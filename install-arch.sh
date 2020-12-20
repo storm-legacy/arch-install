@@ -11,7 +11,7 @@ _HOSTNAME="NTBK"
 # PACKAGES
 KERNEL='linux-lts' #KERNEL
 UCODE='intel-ucode' #MICROCODE
-NETWORK=(networkmanager dhcpcd ufw) #NETWORK UTILITIES
+NETWORK=(networkmanager dhcpcd) #NETWORK UTILITIES
 ADDITIONAL=(ntfs-3g) #OTHERS
 
 # Disk
@@ -25,7 +25,7 @@ _ERR="\033[0;31m"
 _PURPLE="\033[0;35m"
 _RESET="\033[0m"
 
-BASE=(base base-devel "${KERNEL}" "${KERNEL}-headers" linux-firmware "${NETWORK[@]}" "${UCODE}" vim efibootmgr man man-db mc sudo ecryptfs-utils rsync lsof "${ADDITIONAL[@]}") #Base
+BASE=(base base-devel "${KERNEL}" "${KERNEL}-headers" linux-firmware "${NETWORK[@]}" "${UCODE}" vim efibootmgr man man-db mc sudo ecryptfs-utils rsync lsof ufw "${ADDITIONAL[@]}") #Base
 INSTALL_DIR='/mnt'
 _USER="credentials.remember-to-delete"
 
@@ -65,6 +65,15 @@ do
 	esac
 done
 
+echo -e "${_PURPLE}[LOG] Setting System Clock ${_RESET}"
+timedatectl set-ntp true
+err_check
+
+echo -e "${_PURPLE}[LOG] Loading keymap and fonts${_RESET}"
+loadkeys ${_KEYMAP};
+setfont ${_FONT} -m ${_ENCODING}
+err_check
+
 echo -e "${_PURPLE}Username: ${_RESET}";
 read _USERNAME
 
@@ -101,14 +110,6 @@ else
 	exit 1;
 fi
 
-echo -e "${_PURPLE}[LOG] Setting System Clock ${_RESET}"
-timedatectl set-ntp true
-err_check
-
-echo -e "${_PURPLE}[LOG] Loading keymap and fonts${_RESET}"
-loadkeys ${_KEYMAP};
-setfont ${_FONT} -m ${_ENCODING}
-err_check
 
 echo -e "${_PURPLE}[LOG] Checking internet connection${_RESET}"
 curl -I https://aur.archlinux.org >> /dev/null 2> /dev/null
