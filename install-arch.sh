@@ -26,8 +26,7 @@ _PURPLE="\033[0;35m"
 _RESET="\033[0m"
 
 
-#BASE=(base base-devel "${KERNEL}" "${KERNEL}-headers" linux-firmware "${NETWORK[@]}" "${UCODE}" vim efibootmgr man man-db mc sudo ecryptfs-utils rsync lsof ufw "${ADDITIONAL[@]}") #Base
-BASE = (base efibootmgr vim "${UCODE}")
+BASE=(base base-devel "${KERNEL}" "${KERNEL}-headers" linux-firmware "${NETWORK[@]}" "${UCODE}" vim efibootmgr man man-db mc sudo ecryptfs-utils rsync lsof ufw "${ADDITIONAL[@]}") #Base
 INSTALL_DIR='/mnt'
 _USER="credentials.remember-to-delete"
 
