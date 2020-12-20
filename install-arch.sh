@@ -261,7 +261,7 @@ arch-chroot ${INSTALL_DIR} /bin/bash -c "bash /root/install-script.sh";
 
 cat > ${INSTALL_DIR}/root/desk-install.sh << EOF
 echo 'yeiks'
-mv /home/${_USERNAME}/.bashrc.bak ${INSTALL_DIR}/home/${_USERNAME}/.bashrc
+mv /home/${_USERNAME}/.bashrc.bak /home/${_USERNAME}/.bashrc
 rm /root/desk-install.sh
 EOF
 
