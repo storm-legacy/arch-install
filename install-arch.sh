@@ -25,7 +25,9 @@ _ERR="\033[0;31m"
 _PURPLE="\033[0;35m"
 _RESET="\033[0m"
 
-BASE=(base base-devel "${KERNEL}" "${KERNEL}-headers" linux-firmware "${NETWORK[@]}" "${UCODE}" vim efibootmgr man man-db mc sudo ecryptfs-utils rsync lsof ufw "${ADDITIONAL[@]}") #Base
+
+#BASE=(base base-devel "${KERNEL}" "${KERNEL}-headers" linux-firmware "${NETWORK[@]}" "${UCODE}" vim efibootmgr man man-db mc sudo ecryptfs-utils rsync lsof ufw "${ADDITIONAL[@]}") #Base
+BASE = (base efibootmgr vim "${UCODE}")
 INSTALL_DIR='/mnt'
 _USER="credentials.remember-to-delete"
 
@@ -182,7 +184,6 @@ genfstab -U ${INSTALL_DIR} >> ${INSTALL_DIR}/etc/fstab
 echo -e "${_PURPLE}[LOG] Generating arch-chroot configuration script ${_RESET}"
 mv ${_USER} ${INSTALL_DIR}/root/${_USER} #move user-credentials to chroot
 _USERNAME=`cat ${INSTALL_DIR}/root/${_USER} | cut -d":" -f1`
-BOOT_ITEMS=(`efibootmgr | grep -e "^Boot....[* ]" | cut -c 5-8`)
 cat > ${INSTALL_DIR}/root/install-script.sh  << EOF
 #!/bin/bash
 err_check () {
@@ -191,7 +192,7 @@ err_check () {
 		exit 1;
 	fi
 }
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd /root
 
 echo -e "${_PURPLE}[LOG] Setting up timezone [${_TIMEZONE}] ${_RESET}"
 ln -sf /usr/share/zoneinfo/${_TIMEZONE} /etc/localtime
@@ -228,12 +229,6 @@ cat ${_USER} | chpasswd
 rm -f ${_USER}
 err_check
 
-echo -e "${_PURPLE}[LOG] Cleaning Boot Manager${_RESET}"
-for i in "${BOOT_ITEMS[@]}"
-do
-	efibootmgr -b "\$i" -B
-done
-
 echo -e "${_PURPLE}[LOG] Bootloader configuration${_RESET}"
 bootctl install
 err_check
@@ -261,7 +256,7 @@ arch-chroot ${INSTALL_DIR} /bin/bash -c "bash /root/install-script.sh";
 
 cat > ${INSTALL_DIR}/root/desk-install.sh << EOF
 echo 'yeiks'
-mv /home/${_USERNAME}/.bashrc.bak /home/${_USERNAME}/.bashrc
+mv /home/${_USERNAME}/.bashrc.bak ${INSTALL_DIR}/home/${_USERNAME}/.bashrc
 rm /root/desk-install.sh
 EOF
 
