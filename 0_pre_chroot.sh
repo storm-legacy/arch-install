@@ -235,9 +235,8 @@ sleep 1;
 umount -l ${DIR[ROOT]} >> $_LOG_FILE 2>&1
 
 # AND SWAP
-umount -f ${PART[SWAP]} >> $_LOG_FILE 2>&1
+swapoff ${PART[SWAP]} >> $_LOG_FILE 2>&1
 sleep 1;
-umount -l ${PART[SWAP]} >> $_LOG_FILE 2>&1
 
 # CLOSE ENCRYPTED DEVICES IF OPENED
 /bin/cryptsetup close ${_CRYPTHOME_NAME} >> $_LOG_FILE 2>&1
@@ -284,8 +283,14 @@ fi
 
 # PARTITIONING
 echo -ne "${TEXT[INFO]}[LOG] Partitioning device [$_DISK]..."
+# Wipe partition table
 sed -e 's/\s*\([-\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always ${_DISK} >> $_LOG_FILE 2>&1
-	g
+  g
+  w
+EOF
+
+# Format following the scheme
+sed -e 's/\s*\([-\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always ${_DISK} >> $_LOG_FILE 2>&1
 	n		#new part EFI     -- EFI PART
 	1		#part 1
 			#default first sector
@@ -381,7 +386,12 @@ standard_error_check "Encountered problem while enabling swap partition!" 14
 # SYSTEM INSTALLATION
 echo -ne "${TEXT[INFO]}[LOG] System installation...${TEXT[WARN]}STARTED"
 echo -e "${TEXT[INFO]}"
-pacstrap ${DIR[ROOT]} ${APP_PACKAGE} | tee $_LOG_FILE
+pacstrap ${DIR[ROOT]} ${APP_PACKAGE[@]} | tee $_LOG_FILE
 standard_error_check "Encountered errors while installing system!" 15
+echo -ne "${TEXT[INFO]}[LOG] System installation...${TEXT[SUCCESS]}SUCCESS"
 
-# ncpamixer install - https://github.com/fulhax/ncpamixer
+
+# FSTAB GENERATION
+echo -ne "${TEXT[INFO]}[LOG] Generating fstab file..."
+genfstab -U ${DIR[ROOT]} >> ${DIR[ROOT]}/etc/fstab
+standard_error_check "Could not generate fstab file!" 16
